@@ -109,7 +109,13 @@ diagnoseNet=BayesNet([('Healthy','','',(0.8,0.2)),
                                                 (False,False):(0.4 , 0.6)})])        
         
 '''Please Build the Bayes net from the provided diagram'''
-awakeNet=None # <-------- Your declaration goes here          
+awakeNet = BayesNet([
+    ('T', '<6 <7 <8 <9 >9', , (0.3, 0.1, 0.1, 0.1, 0.4)),
+    ('A', , 'T', {'<6': (0.05, 0.95), '<7': (0.3, 0.7), '<8': (0.8, 0.2), '<9': (0.9, 0.1), '>9': (0.95, 0.05)}),
+    ('L', '', 'A', {True: (0.7, 0.3), False: (0.2, 0.8)}),
+    ('N', 'quiet snore blanket steps', 'A', {
+     True: (0.2, 0.01, 0.29, 0.5), False: (0.6, 0.29, 0.1, 0.01)})
+])
                      
 if __name__ == '__main__': 
     '''
