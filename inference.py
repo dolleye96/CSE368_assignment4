@@ -15,7 +15,8 @@ class Inference:
     def __init__(self, bayesian_network, evidence = {}):
         self.net=bayesian_network
         self.evidence=evidence
-        
+
+
     def sample(self) -> dict:
         """ Return sample from network:
         Sample should be a dictionary where the keyes are  
@@ -37,11 +38,11 @@ class Inference:
         e[X]=xval
         return e
 
-    def enumeration_infer(self, X, e=None) -> ProbDist:
+    def enumeration_ask(self, X, e=None) -> ProbDist:
         """
         TODO: Return the conditional probability distribution of variable X
         given evidence e
-        """    
+        """
         
         # Use evidence passed to function call, otherwise use default
         if e==None:
@@ -56,42 +57,77 @@ class Inference:
         * Normalize
         """
 
-        """YOUR CODE""" 
+        """YOUR CODE"""
 
         return ProbDist().normalize() # <- may need to tweak a bit
+
+    #new
+    def consistent(self, samp, evidence):
+        for (key, val) in evidence.items():
+            if samp[key] != val:
+                return False
+        return True
 
     def rejection_sampling(self,X :str, N :int, e :dict = None) -> ProbDist:
         """
         TODO: Estimate the probability distribution of variable X given using 
         N samples and evidence e. If not evidence is given, use the default
         for the Inference object.
+        X = query variable
+        N = total number of samples generated
+        e = evidence as event
+        need bayesian net
+        return P(X|e)
         """
         if e==None:
             e=self.evidence
-            
-        """YOUR CODE""" 
+        """YOUR CODE"""
+        W = {True: 0.0, False: 0.0}
 
-        return ProbDist() # <- put parameters in it
+        for i in range(N):
+            s = self.sample()
+            if self.consistent(s, e):
+                sam = s[X]
+                W[sam] += 1
+        return ProbDist(X, W) # <- put parameters in it
             
-    def likelihood_weighting(self, X :str, N:int, e : dict =None) -> ProbDist:
+    def likelihood_weighting(self, X:str, N:int, e:dict =None) -> ProbDist:
         """
         TODO: Estimate the probability distribution of variable X given evidence e.
+        X = query variable
+        N = total number of samples generated
+        e = evidence as event
+        need bayesian net
         """
 
-        """YOUR CODE""" 
-
-        return ProbDist() # <- put parameters in it
+        """YOUR CODE"""
+        W = {True: 0.0, False: 0.0}
+        for i in range(N):
+            x, w = self.weighted_sample(self.net)
+            sam = x[X]
+            W[sam] += w
+        return ProbDist(X, W) # <- put parameters in it
         
     def weighted_sample(self,e :dict = None) -> (dict,float):
         """
         TODO: Sample an event from bn that's consistent with the evidence e;
         return the event and its weight, the likelihood that the event
         accords to the evidence.
+        e = evidence as event
+        need bayesian network
         """
 
-        """YOUR CODE""" 
-        
-        return {}, 1.0 # <- fake value, only type of variables are same
+        """YOUR CODE"""
+        x = {}
+        w = 1
+        for node in self.net.nodes:     #node = BayesNode
+            Xi = node.variable
+            if self.evidence.get(Xi) != None:       #if Xi is an evidence variable
+                w *= node.p(self.evidence.get(Xi), x)        #THIS IS THE PROBLEM
+            else:
+                x[Xi] = node.sample(x)
+
+        return x, w # <- fake value, only type of variables are same
 
 diagnoseNet=BayesNet([('Healthy','','',(0.8,0.2)),
                       ('FluShot','','',(0.6,0.4)),
@@ -109,7 +145,13 @@ diagnoseNet=BayesNet([('Healthy','','',(0.8,0.2)),
                                                 (False,False):(0.4 , 0.6)})])        
         
 '''Please Build the Bayes net from the provided diagram'''
-awakeNet=None # <-------- Your declaration goes here          
+awakeNet = BayesNet([
+    ('T', '<6 <7 <8 <9 >9', '', (0.3, 0.1, 0.1, 0.1, 0.4)),
+    ('A', '', 'T', {'<6': (0.05, 0.95), '<7': (0.3, 0.7), '<8': (0.8, 0.2), '<9': (0.9, 0.1), '>9': (0.95, 0.05)}),
+    ('L', '', 'A', {True: (0.7, 0.3), False: (0.2, 0.8)}),
+    ('N', 'quiet snore blanket steps', 'A', {
+     True: (0.2, 0.01, 0.29, 0.5), False: (0.6, 0.29, 0.1, 0.01)})
+])
                      
 if __name__ == '__main__': 
     '''
