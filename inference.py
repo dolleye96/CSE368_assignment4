@@ -57,6 +57,20 @@ class Inference:
         """
 
         """YOUR CODE""" 
+        # list of all variables in the net.
+        allVars = self.net.variables
+        givenVars = [X]
+        hiddenVars = []
+
+        # add evidence variables into givenVars. evidence's key is variable name.
+        for ename in e:
+            givenVars.append(ename)
+
+        # subtracting givenVars from allVars to get hiddenVars.
+        allVars_copy = allVars.copy()
+        for x in givenVars:
+            allVars_copy.remove(x)
+        hiddenVars = allVars_copy
 
         return ProbDist().normalize() # <- may need to tweak a bit
 
