@@ -58,40 +58,21 @@ class Inference:
 
         """YOUR CODE""" 
         # list of all variables in the net.
-        allVars = self.net.variables
-        givenVars = [X]
-        hiddenVars = []
-
-        # add evidence variables into givenVars. evidence's key is variable name.
-        for ename in e:
-            givenVars.append(ename)
-
-        # subtracting givenVars from allVars to get hiddenVars.
-        allVars_copy = allVars.copy()
-        for x in givenVars:
-            allVars_copy.remove(x)
-        hiddenVars = allVars_copy
-
-        # a given node never has hidden variable as its parents nor query
+        givenVars = []
         givenNodes = []
+        hiddenVars = []
         hiddenNodes = []
-        for n in self.net.nodes:
-            isHiddenN = False
-            for h in hiddenVars:
-                # query is hidden variable
-                if (h==n.variable):
-                    hiddenNodes.append(n)
-                    isHiddenN = True
-                    break
-                # evidence (parent) is hidden variable
-                elif h in n.parents:
-                    hiddenNodes.append(n)
-                    isHiddenN = True
-                    break
-            if isHiddenN:
-                continue
-            # node has no hidden variable
-            givenNodes.append(n)
+
+        # distribute hidden/given var/nodes
+        for vi in self.net.variables:
+            try:
+                v = e.get(vi)
+                # This variable vi is given evidence.
+                givenVars.append(vi)
+                givenNodes.append(self.net.variable_node(vi))
+            except:
+                hiddenVars.append(vi)
+                hiddenNodes.append(self.net.variable_node(vi))
 
         return ProbDist().normalize() # <- may need to tweak a bit
 
