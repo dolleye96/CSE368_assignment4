@@ -72,6 +72,27 @@ class Inference:
             allVars_copy.remove(x)
         hiddenVars = allVars_copy
 
+        # a given node never has hidden variable as its parents nor query
+        givenNodes = []
+        hiddenNodes = []
+        for n in self.net.nodes:
+            isHiddenN = False
+            for h in hiddenVars:
+                # query is hidden variable
+                if (h==n.variable):
+                    hiddenNodes.append(n)
+                    isHiddenN = True
+                    break
+                # evidence (parent) is hidden variable
+                elif h in n.parents:
+                    hiddenNodes.append(n)
+                    isHiddenN = True
+                    break
+            if isHiddenN:
+                continue
+            # node has no hidden variable
+            givenNodes.append(n)
+
         return ProbDist().normalize() # <- may need to tweak a bit
 
     def rejection_sampling(self,X :str, N :int, e :dict = None) -> ProbDist:
