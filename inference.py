@@ -58,8 +58,16 @@ class Inference:
         """
 
         """YOUR CODE"""
-
+        vars = {}
+        for xi in self.net.variables:
+            vars[xi] = self.enumerate_all()
         return ProbDist().normalize() # <- may need to tweak a bit
+
+    def enumerate_all(self, vars, e):
+        if len(vars) == 0:
+            return 1
+
+
 
     #new
     def consistent(self, samp, evidence):
@@ -101,9 +109,11 @@ class Inference:
         """
 
         """YOUR CODE"""
+        if e == None:
+            e = self.evidence
         W = {True: 0.0, False: 0.0}
         for i in range(N):
-            x, w = self.weighted_sample(self.net)
+            x, w = self.weighted_sample(e)
             sam = x[X]
             W[sam] += w
         return ProbDist(X, W) # <- put parameters in it
@@ -118,16 +128,16 @@ class Inference:
         """
 
         """YOUR CODE"""
-        x = {}
+        x = dict(e)
         w = 1
         for node in self.net.nodes:     #node = BayesNode
             Xi = node.variable
-            if self.evidence.get(Xi) != None:       #if Xi is an evidence variable
-                w *= node.p(self.evidence.get(Xi), x)        #THIS IS THE PROBLEM
+            if Xi in e:       #if Xi is an evidence variable this is problem
+                w *= node.p(e[Xi], x)        #THIS IS THE PROBLEM
             else:
                 x[Xi] = node.sample(x)
 
-        return x, w # <- fake value, only type of variables are same
+        return x, w
 
 diagnoseNet=BayesNet([('Healthy','','',(0.8,0.2)),
                       ('FluShot','','',(0.6,0.4)),
