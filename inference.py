@@ -73,6 +73,23 @@ class Inference:
             except:
                 hiddenVars.append(vi)
                 hiddenNodes.append(self.net.variable_node(vi))
+        
+        # new givenNodes value (exclude hidden nodes)
+        givenNodes_temp = []
+        # Node who's parents are hidden node(s) is also a hidden node.
+        for gni in givenNodes:
+            # checking gni's parents
+            is_gni_hidden = False
+            for p in gni.parents:
+                if is_gni_hidden: 
+                    break
+                if p.variable in hiddenVars:
+                    hiddenNodes.append(gni)
+                    is_gni_hidden = True
+                    break
+            if not is_gni_hidden:
+                givenNodes_temp.append(gni)
+        givenNodes = givenNodes_temp
 
         return ProbDist().normalize() # <- may need to tweak a bit
 
