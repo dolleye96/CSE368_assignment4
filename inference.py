@@ -93,6 +93,9 @@ class Inference:
             # node has no hidden variable
             givenNodes.append(n)
 
+        # get P of given node
+        
+
         return ProbDist().normalize() # <- may need to tweak a bit
 
     def rejection_sampling(self,X :str, N :int, e :dict = None) -> ProbDist:
